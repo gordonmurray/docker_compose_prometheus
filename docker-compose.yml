@@ -2,28 +2,31 @@ version: "3.9"
 
 networks:
   default:
-    external: 
+    external:
       name: my-network
 
 services:
 
   prometheus:
+    container_name: prometheus
     image: prom/prometheus:v2.23.0
     volumes:
       - ./prometheus/:/etc/prometheus/
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090"
     restart: always
 
   alertmanager:
+    container_name: alertmanager
     image: prom/alertmanager:v0.21.0
     ports:
       - 9093:9093
     restart: always
 
   grafana:
+    container_name: grafana
     image: grafana/grafana:7.3.6
     user: "472"
     depends_on:
@@ -33,7 +36,27 @@ services:
     restart: always
 
   node-exporter:
+    container_name: node-exporter
     image: quay.io/prometheus/node-exporter:latest
     ports:
       - 9100:9100
     restart: unless-stopped
+
+  haproxy:
+    container_name: haproxy
+    image: haproxy:2.3
+    volumes:
+      - ./haproxy/:/usr/local/etc/haproxy/
+    ports:
+      - 80:8090
+      - 8877:8877
+    restart: always
+
+  website:
+    container_name: apache
+    image: php:8.0-apache
+    volumes:
+      - ./php/:/var/www/html/
+    ports:
+      - 8080:80
+    restart: always
